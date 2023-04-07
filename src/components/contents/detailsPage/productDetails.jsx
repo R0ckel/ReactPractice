@@ -1,9 +1,9 @@
 import React, {useContext} from 'react';
-import { KeyValueTable } from '../../dataTable/keyValueTable';
-import { CommentForm } from './commentForm';
-import { PriceConverter } from './priceConverter';
+import {KeyValueTable} from '../../dataTable/keyValueTable';
+import {CommentForm} from './commentForm';
+import {PriceConverter} from './priceConverter';
 import {ProductListContext} from "../../../contexts/productListContext";
-import {Link, Navigate, useLocation, useParams} from "react-router-dom";
+import {Link, Navigate, useParams} from "react-router-dom";
 
 export default function ProductDetails (){
   const { id } = useParams()

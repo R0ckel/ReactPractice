@@ -1,11 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import MenuItem from './menuItem';
-
-import { useState } from 'react';
 import {useParams} from "react-router-dom";
 
-const Menu = ({ categories, contentUpdater }) => {
-  const { categoryName } = useParams()
+const Menu = ({categories}) => {
+  const {categoryName} = useParams()
   const currentCategory = Object.values(categories).flat().find((x) => x.name === categoryName);
   const [, setChosenIndex] = useState(currentCategory?.index);
 

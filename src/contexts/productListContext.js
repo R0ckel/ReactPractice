@@ -7,5 +7,6 @@ export const ProductListContext = React.createContext({
 	selectedProducts: [],
 	attrsToHide: [],
 	selectedCount: 0,
-	setSelectedCount: (value) => {}
+	setSelectedCount: () => {
+	}
 })

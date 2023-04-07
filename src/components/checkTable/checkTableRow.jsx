@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useContext} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {UserStatusContext} from "../../contexts/userStatus.context";
 import {ProductListContext} from "../../contexts/productListContext";
 import {Link} from "react-router-dom";
@@ -22,9 +22,8 @@ export function useChecked(selectedList, setSelectedCount, selectedCount, id) {
 }
 
 const CheckTableRow = React.memo(function CheckTableRow(props) {
-  const { selectedProducts, attrsToHide,
-    showProductDetails, setSelectedCount, selectedCount } = useContext(ProductListContext);
-  const { item } = props;
+  const {selectedProducts, attrsToHide, setSelectedCount, selectedCount} = useContext(ProductListContext);
+  const {item} = props;
   const { checked, updateCheck } = useChecked(
     selectedProducts, setSelectedCount, selectedCount, item.id
   )
