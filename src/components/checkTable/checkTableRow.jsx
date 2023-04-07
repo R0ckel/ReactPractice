@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect, useCallback, useContext} from 'react';
+import {UserStatusContext} from "../../contexts/userStatus.context";
+import {ProductListContext} from "../../contexts/productListContext";
 
-export function useChecked(dispatcherToInvoke, initialValue = false) {
-  const [checked, setChecked] = useState(initialValue);
+export function useChecked(selectedList, changeSelectedCount, id) {
+  const [checked, setChecked] = useState(selectedList[id]);
 
   const updateCheck = useCallback(() => {
-    dispatcherToInvoke({ isIncrement: !checked });
+    selectedList[id] = !selectedList[id];
+    changeSelectedCount(selectedList[id])
     setChecked((prevState) => !prevState);
-  }, [checked, dispatcherToInvoke]);
+  }, [id, selectedList, changeSelectedCount]);
 
   useEffect(() => {
     return () => {
@@ -18,40 +21,57 @@ export function useChecked(dispatcherToInvoke, initialValue = false) {
 }
 
 function CheckTableRow(props) {
-  const { item, selectedCounterDispatcher, toHide = [], showProductDetails } = props;
-  const { checked, updateCheck } = useChecked(selectedCounterDispatcher)
+  const { selectedProducts, attrsToHide,
+    showProductDetails, changeSelectedCount } = useContext(ProductListContext);
+  const { item } = props;
+  const { checked, updateCheck } = useChecked(selectedProducts, changeSelectedCount, item.id)
 
   const openDetails = () => {
     showProductDetails(item.id);
   };
 
-  const cells = Object.entries(item)
-    .filter(([key]) => !toHide.includes(key))
-    .map(([, val]) => (
-    <td key={`${item.id}${val}`}>{val}</td>
-  ));
-
   useEffect(() => {
     console.log(`Checked state for item with id ${item.id} has changed to ${checked}`);
-    
+
     return () => {
       console.log(`Unmounting CheckTableRow with id ${item.id}`);
     };
   }, [checked, item.id]);
 
+
+  const cells = Object.entries(item)
+    .filter(([key]) => !attrsToHide.includes(key))
+    .map(([, val]) => (
+    <td key={`${item.id}${val}`}>{val}</td>
+  ));
+
   return (
     <tr>
       {cells}
       <td>
-        <div className="checkbox-wrapper">
-          <input
-            type="checkbox"
-            id={item.id + '_checkbox'}
-            onChange={updateCheck}
-            checked={checked}
-          />
-          <label htmlFor={item.id + '_checkbox'} className="check-box"></label>
-        </div>
+        <UserStatusContext.Consumer>
+          {(status) => {
+            const handleCheck = () => {
+              if (!status.isLoggedIn) {
+                alert("You must be authorized to check products!");
+                return;
+              }
+              updateCheck();
+            };
+            return (
+              <div className="checkbox-wrapper">
+                <input
+                  type="checkbox"
+                  id={item.id + "_checkbox"}
+                  defaultChecked={checked}
+                  disabled={!status.isLoggedIn}
+                />
+                <label htmlFor={item.id + "_checkbox"} className="check-box"
+                       onClick={handleCheck}></label>
+              </div>
+            );
+          }}
+        </UserStatusContext.Consumer>
       </td>
       <td>
         <button className="btn info dynamic" onClick={openDetails}>

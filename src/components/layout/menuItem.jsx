@@ -18,8 +18,8 @@ class MenuItem extends React.Component {
 
   render(){
     return(
-      <li className={`menuItem ${this.state.chosen?"chosen":"dynamic"}`}>
-        <input type="radio" name="mainMenu" onClick={this.setCurrentAsChosen}
+      <li className={`menuItem ${this.state.chosen?"chosen":"dynamic"}`} onClick={this.setCurrentAsChosen}>
+        <input type="radio" name="mainMenu"
           value={this.item} defaultChecked={this.state.chosen} key={this.item.id} id={this.item.id}/>
         <label htmlFor={this.item.id}>{this.item.name}</label>
       </li>

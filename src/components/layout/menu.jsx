@@ -17,9 +17,9 @@ class Menu extends React.Component {
     item.id = `${item.name}_id${item.index}${item.chosen?"T":"F"}`;
   }
 
-  updateMenu(cindex){
+  updateMenu(categoryIndex){
     for (const item of this.items) {
-      if (item.index === cindex){
+      if (item.index === categoryIndex){
         item.chosen=true;
         this.props.contentUpdater(item.name);
       }
@@ -29,7 +29,7 @@ class Menu extends React.Component {
       this.updateKey(item);
     }
     this.setState(() => ({
-      chosenIndex: cindex
+      chosenIndex: categoryIndex
     }))
   }
 

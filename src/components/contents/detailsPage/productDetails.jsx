@@ -2,35 +2,36 @@ import React from 'react';
 import { KeyValueTable } from '../../dataTable/keyValueTable';
 import { CommentForm } from './commentForm';
 import { PriceConverter } from './priceConverter';
+import {ProductListContext} from "../../../contexts/productListContext";
 
 export class ProductDetails extends React.Component{
-  constructor(props){
-    super(props)
-
-    this.item = props.item
-  }
-
   render(){
     return(
-      <main>
-        <button
-          className='btn white'
-          onClick={()=>this.props.showProductList(this.item.category)}>
-            &larr; Back to category
-        </button>
+      <ProductListContext.Consumer>
+        {({currentProducts, showProductList, categoryName})=>{
+          return (
+            <main>
+              <button
+                className='btn white'
+                onClick={()=>showProductList(categoryName)}>
+                &larr; Back to category
+              </button>
 
-        <h1>{this.item.mark} {this.item.model}</h1>
-        <h3>Details:</h3>
-        <KeyValueTable 
-          item={this.item}
-        />
-        
-        <h2>PriceConverter</h2>
-        <PriceConverter price={this.item.price}/>
+              <h1>{currentProducts[0].mark} {currentProducts[0].model}</h1>
+              <h3>Details:</h3>
+              <KeyValueTable
+                item={currentProducts[0]}
+              />
 
-        <br/>
-        <CommentForm/>
-      </main>
+              <h2>PriceConverter</h2>
+              <PriceConverter price={currentProducts[0].price}/>
+
+              <br/>
+              <CommentForm/>
+            </main>
+          )
+        }}
+      </ProductListContext.Consumer>
     )
   }
 }

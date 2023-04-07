@@ -3,44 +3,33 @@ import LoginButton from "./loginButton";
 import LogoutButton from "./logoutButton";
 import Image from "../../helpers/image";
 import logo from "../../../image/logo192.png";
+import {UserStatusContext} from "../../../contexts/userStatus.context";
 
 class Header extends React.Component{
-  constructor(props){
-    super(props);
-    
-    this.changeIsLoggedIn = props.changeIsLoggedIn;
-    this.isLoggedIn = props.isLoggedIn;  
-    
-    this.logout = this.logout.bind(this);
-    this.login = this.login.bind(this);
-  }
-
-  setLoggedIn(value){
-    this.changeIsLoggedIn(value);
-  }
-
-  login(){
-    this.setLoggedIn(true)
-  }
-
-  logout(){
-    this.setLoggedIn(false)
-  }
-
   render(){
-
-    var btn;
-    if (this.isLoggedIn){
-      btn = <LogoutButton logout={this.logout}/>
-    } else {
-      btn = <LoginButton login={this.login}/>
-    }
     return (
       <header>
-        <Image className="headerLogo" src={logo}/>
+        <Image className="headerLogo" src={logo} />
         <h2>MyReactApp</h2>
-        {btn}
-        
+        <UserStatusContext.Consumer>
+          {({ isLoggedIn, setLoggedInValue }) => {
+            let btn;
+            if (isLoggedIn) {
+              btn = (
+                <LogoutButton
+                  setLoginStatus={setLoggedInValue}
+                />
+              );
+            } else {
+              btn = (
+                <LoginButton
+                  setLoginStatus={setLoggedInValue}
+                />
+              );
+            }
+            return <div className="headerButton aright">{btn}</div>;
+          }}
+        </UserStatusContext.Consumer>
       </header>
     );
   }

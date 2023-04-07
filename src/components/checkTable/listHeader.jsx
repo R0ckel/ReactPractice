@@ -1,14 +1,19 @@
-import React, {useState} from 'react';
+import React from 'react';
+import {ProductListContext} from "../../contexts/productListContext";
 
-function ListHeader(props) {
-  const [selected, ] = useState(props.selected);
-
+function ListHeader() {
   return (
-    <div className='listHeader'>
-      <span className='warning'>{props.name}</span>
-      <span className='centered'>Shown: {props.shown}</span>
-      <span className='aright'>Selected: {selected}</span>
-    </div>
+    <ProductListContext.Consumer>
+      {({categoryName, selectedCount, currentProducts})=>{
+        return (
+          <div className='listHeader'>
+            <span className='warning'>{categoryName}</span>
+            <span className='centered'>Shown: {currentProducts.length}</span>
+            <span className='aright'>Selected: {selectedCount}</span>
+          </div>
+        )
+      }}
+    </ProductListContext.Consumer>
   );
 }
 

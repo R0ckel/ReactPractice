@@ -1,33 +1,30 @@
 import React from 'react';
+import {ProductListContext} from "../../contexts/productListContext";
 
 class CheckTableHeader extends React.Component {
-	constructor(props){
-		super(props);
-
-    this.toHide = props.toHide || [];
-		
-		this.item = props.item;
-	}
-
 	render(){
-    var tcells = []
-    for (const key in this.item) {
-      if (Object.hasOwnProperty.call(this.item, key)
-          && !this.toHide.includes(key)) {
-        tcells.push(key);
-      }
-    }
-    tcells.push("Checked");
-    tcells.push("Action");
-		return(
-			<thead className='capitalize'>
-        <tr>
-          {tcells.map(tcell => (
-            <th key={this.item.id + tcell}>{tcell}</th>
-          ))}
-        </tr>
-      </thead>
-		)
+		return <ProductListContext.Consumer>
+			{({attrsToHide, currentProducts})=>{
+				const tableCells = [];
+				for (const key in currentProducts[0]) {
+					if (Object.hasOwnProperty.call(currentProducts[0], key)
+						&& !attrsToHide.includes(key)) {
+						tableCells.push(key);
+					}
+				}
+				tableCells.push("Checked");
+				tableCells.push("Action");
+				return(
+					<thead className='capitalize'>
+					<tr>
+						{tableCells.map(tableCell => (
+							<th key={currentProducts[0].id + tableCell}>{tableCell}</th>
+						))}
+					</tr>
+					</thead>
+				)
+			}}
+		</ProductListContext.Consumer>
 	}
 }
 
