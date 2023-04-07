@@ -1,30 +1,18 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-class MenuItem extends React.Component {
-  constructor(props){
-    super(props);
-    this.item = props.item;
-    this.updater = props.updater;
-    this.state = {chosen: props.item.chosen};
+function MenuItem(props) {
+  const { item, currentCategory } = props;
+  const chosen = currentCategory === item
 
-    this.setCurrentAsChosen = this.setCurrentAsChosen.bind(this);
-  }
-
-  setCurrentAsChosen(){
-    if (!this.state.chosen){
-      this.props.updater(this.item.index)
-    }
-  }
-
-  render(){
-    return(
-      <li className={`menuItem ${this.state.chosen?"chosen":"dynamic"}`} onClick={this.setCurrentAsChosen}>
-        <input type="radio" name="mainMenu"
-          value={this.item} defaultChecked={this.state.chosen} key={this.item.id} id={this.item.id}/>
-        <label htmlFor={this.item.id}>{this.item.name}</label>
+  return (
+    <Link to={`/categories/${item.name}`} className={'noLink'}>
+      <li className={`menuItem ${chosen ? 'chosen' : 'dynamic'}`}>
+        <input type='radio' name='mainMenu' value={item} defaultChecked={chosen} key={item.id} id={item.id} />
+        <label htmlFor={item.id}>{item.name}</label>
       </li>
-    )
-  }
+    </Link>
+  );
 }
 
 export default MenuItem

@@ -120,8 +120,6 @@ main{
   display: none;
 }
 
-
-
 .menuItem input:checked ~ * {
   cursor: default !important;
 }
@@ -133,8 +131,6 @@ main{
 .menuItem, .menuItem label {
   cursor: pointer;
 }
-
-
 
 .menuItem label {
   height: 100%;
@@ -249,4 +245,9 @@ input[type="number"] {
 
 input[type="submit"]:hover {
   background-color: #3e8e41;
+}
+
+.noLink{
+  text-decoration: none;
+  color: #eaeaea;
 }

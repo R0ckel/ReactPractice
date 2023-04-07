@@ -1,50 +1,43 @@
 import React from 'react';
 import MenuItem from './menuItem';
 
-class Menu extends React.Component {
-  constructor(props){
-      super(props);
+import { useState } from 'react';
+import {useParams} from "react-router-dom";
 
-      this.items = props.items
-      this.state = {
-        chosenIndex: 0, 
-      };
+const Menu = ({ categories, contentUpdater }) => {
+  const { categoryName } = useParams()
+  const currentCategory = Object.values(categories).flat().find((x) => x.name === categoryName);
+  const [, setChosenIndex] = useState(currentCategory?.index);
 
-      this.updateMenu = this.updateMenu.bind(this);
+  if (currentCategory === undefined) {
+    console.log("bad path...")
+    return <></>
   }
 
-  updateKey(item){
-    item.id = `${item.name}_id${item.index}${item.chosen?"T":"F"}`;
-  }
+  const updateKey = (item) => {
+    item.id = `${item.name}_id${item.index}${item.chosen ? "T" : "F"}`;
+  };
 
-  updateMenu(categoryIndex){
-    for (const item of this.items) {
-      if (item.index === categoryIndex){
-        item.chosen=true;
-        this.props.contentUpdater(item.name);
-      }
-      else {
-        item.chosen=false;
-      }
-      this.updateKey(item);
-    }
-    this.setState(() => ({
-      chosenIndex: categoryIndex
-    }))
-  }
+  const updateMenu = (categoryIndex) => {
+    categories.forEach((item) => {
+      item.chosen = item.index === categoryIndex;
+      updateKey(item);
+    });
+    setChosenIndex(categoryIndex);
+  };
 
-  render(){
-    return(
-      <div className="menu">
-        <ul className="menuList">
-          {this.items.map((item) => (
-            <MenuItem item={item} key={item.id} 
-              updater={this.updateMenu}/>
-          ))}
-        </ul>
-      </div>
-    )
-  }
-}
+  return (
+    <div className="menu">
+      <ul className="menuList">
+        {categories.map((category) => (
+          <MenuItem item={category}
+                    currentCategory={currentCategory}
+                    key={category.id}
+                    updater={updateMenu} />
+        ))}
+      </ul>
+    </div>
+  );
+};
 
-export default Menu
+export default Menu;

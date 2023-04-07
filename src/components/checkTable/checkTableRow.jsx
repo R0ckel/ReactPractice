@@ -1,15 +1,16 @@
 import React, {useState, useEffect, useCallback, useContext} from 'react';
 import {UserStatusContext} from "../../contexts/userStatus.context";
 import {ProductListContext} from "../../contexts/productListContext";
+import {Link} from "react-router-dom";
 
-export function useChecked(selectedList, changeSelectedCount, id) {
+export function useChecked(selectedList, setSelectedCount, selectedCount, id) {
   const [checked, setChecked] = useState(selectedList[id]);
 
   const updateCheck = useCallback(() => {
     selectedList[id] = !selectedList[id];
-    changeSelectedCount(selectedList[id])
+    setSelectedCount(selectedList[id]? selectedCount + 1 : selectedCount - 1)
     setChecked((prevState) => !prevState);
-  }, [id, selectedList, changeSelectedCount]);
+  }, [id, selectedList, setSelectedCount, selectedCount]);
 
   useEffect(() => {
     return () => {
@@ -20,28 +21,26 @@ export function useChecked(selectedList, changeSelectedCount, id) {
   return { checked, updateCheck };
 }
 
-function CheckTableRow(props) {
+const CheckTableRow = React.memo(function CheckTableRow(props) {
   const { selectedProducts, attrsToHide,
-    showProductDetails, changeSelectedCount } = useContext(ProductListContext);
+    showProductDetails, setSelectedCount, selectedCount } = useContext(ProductListContext);
   const { item } = props;
-  const { checked, updateCheck } = useChecked(selectedProducts, changeSelectedCount, item.id)
+  const { checked, updateCheck } = useChecked(
+    selectedProducts, setSelectedCount, selectedCount, item.id
+  )
 
-  const openDetails = () => {
-    showProductDetails(item.id);
-  };
-
-  useEffect(() => {
-    console.log(`Checked state for item with id ${item.id} has changed to ${checked}`);
-
-    return () => {
-      console.log(`Unmounting CheckTableRow with id ${item.id}`);
-    };
-  }, [checked, item.id]);
+  // useEffect(() => {
+  //   console.log(`Checked state for item with id ${item.id} has changed to ${checked}`);
+  //
+  //   return () => {
+  //     console.log(`Unmounting CheckTableRow with id ${item.id}`);
+  //   };
+  // }, [checked, item.id]);
 
 
   const cells = Object.entries(item)
-    .filter(([key]) => !attrsToHide.includes(key))
-    .map(([, val]) => (
+  .filter(([key]) => !attrsToHide.includes(key))
+  .map(([, val]) => (
     <td key={`${item.id}${val}`}>{val}</td>
   ));
 
@@ -74,12 +73,16 @@ function CheckTableRow(props) {
         </UserStatusContext.Consumer>
       </td>
       <td>
-        <button className="btn info dynamic" onClick={openDetails}>
-          Details
-        </button>
+        <Link to={`/products/${item.id}`}>
+          <button className="btn info dynamic">
+            Details
+          </button>
+        </Link>
       </td>
     </tr>
   );
-}
+});
+
+
 
 export default CheckTableRow;

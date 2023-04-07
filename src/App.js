@@ -1,12 +1,14 @@
 import './css/App.css';
 import Header from './components/layout/header/header'
 import Footer from './components/layout/footer';
-import ProductList from './components/contents/productList';
+import ProductList from './components/contents/categoryProductList/productList';
 import Menu from './components/layout/menu';
-import React from 'react';
-import { ProductDetails } from './components/contents/detailsPage/productDetails';
 import {UserStatusContext} from "./contexts/userStatus.context";
 import {ProductListContext} from "./contexts/productListContext";
+import {Navigate, Route, Routes} from "react-router-dom";
+import React, { useState } from 'react';
+import ProductDetails from "./components/contents/detailsPage/productDetails";
+
 
 const allItems = [
   {
@@ -79,131 +81,115 @@ const allItems = [
   }
 ];
 
-class App extends React.Component {
-  constructor(props){
-    super(props);
+const App = ({ isLoggedIn: isLoggedInProp = true }) => {
+  const allCategories = getItemsCategoryList(allItems)
+  const [items, ] = useState(allItems);
+  const [isLoggedIn, setIsLoggedIn] = useState(isLoggedInProp);
+  const [currentCategory, ] = useState(allCategories[0].name);
+  const [selectedProducts, setSelectedProducts] = useState(initSelectedProducts());
+  const [selectedCount, setSelectedCount] = useState(0);
 
-    this.state = {
-      items: allItems
-        .filter(x => x.category === 
-          this.getItemsCategoryList(allItems)[0].name),
-      isLoggedIn: props.isLoggedIn !== undefined? props.isLoggedIn:true,
-      contentType: "productList",
-      currentCategory: this.getItemsCategoryList(allItems)[0].name,
-      selectedProducts: this.initSelectedProducts(),
-      selectedCount: 0
-    }
-  }
-
-  changeSelectedCount = (increment) => {
-    let current = this.state.selectedCount;
-    this.setState(()=>({
-      selectedCount: increment ? current + 1 : current - 1
-    }))
-  }
-
-  initSelectedProducts() {
+  function initSelectedProducts() {
     const selected = {};
     for (let product of Object.values(allItems)) {
       selected[product.id] = false;
     }
-    return {...selected}; // create a new object with the same properties
+    return { ...selected };
   }
 
-  handleLoginChange = (value) => {
-    this.setState({
-      isLoggedIn: value,
-      selectedCount: 0,
-      selectedProducts: this.initSelectedProducts(),
-    });
-  };
+  function handleLoginChange(value) {
+    setIsLoggedIn(value);
+    setSelectedCount(0);
+    setSelectedProducts(initSelectedProducts());
+  }
 
-  getItemsCategoryList(eList){
+  function getItemsCategoryList(eList) {
     let i = 0;
     const categories = [];
     for (const el of eList) {
-      if (categories.filter(x => x.name === el.category).length === 0){
+      if (categories.filter((x) => x.name === el.category).length === 0) {
         categories.push({
           name: el.category,
-          id: `${el.category}_id${i}${i===0?"T":"F"}`, 
+          id: `${el.category}_id${i}${i === 0 ? 'T' : 'F'}`,
           index: i,
-          chosen: i === 0});
+          chosen: i === 0,
+        });
         i++;
       }
     }
     return categories;
   }
 
-  showProductDetails = (id) => {
-    this.setState(() => ({
-      items: allItems.filter(x => x.id === id),
-      contentType: "productDetails",
-      lastCategory: allItems.filter(x => x.id === id).category
-    }))
-  }
+  // function showProductDetails(id) {
+  //   setItems(allItems.filter((x) => x.id === id));
+  //   setContentType('productDetails');
+  //   const lastCategory = allItems.filter((x) => x.id === id)[0].category;
+  //   setCurrentCategory(lastCategory);
+  // }
 
-  showProductList = (category) => {
-    if (category === null){
-      category = this.state.currentCategory
-    }
-    this.setState(() => ({
-      items: allItems
-        .filter(x => x.category === category),
-      contentType: "productList",
-      currentCategory: category
-    }))
-  }
-  
-  render(){
-    let content;
-    switch(this.state.contentType){
-      case "productList":
-        content = <ProductList
-          key={this.state.items[0].category}/>
-        break;
+  // function showProductList(category = null) {
+  //   if (category === null) {
+  //     category = currentCategory;
+  //   }
+  //   setItems(allItems.filter((x) => x.category === category));
+  //   setContentType('productList');
+  //   setCurrentCategory(category);
+  // }
 
-      case "productDetails":
-        content = <ProductDetails
-          showProductList = {this.showProductList}
-          key={this.state.items[0].id}/>
-        break;
-
-      default:
-        content = <div>No content</div>
-    }
-
+  function CategoryPage({ categories }) {
     return (
-      <div className="app">
-        <div className="wrapper">
-          <UserStatusContext.Provider value={{
-            isLoggedIn: this.state.isLoggedIn,
-            setLoggedInValue: (value) => this.handleLoginChange(value)
-          }}>
-            <Header key={this.state.isLoggedIn}/>
-            <div className="pageContent">
-              <Menu items={this.getItemsCategoryList(allItems)}
-                contentUpdater={this.showProductList}/>
-
-              <ProductListContext.Provider value={{
-                categoryName: this.state.currentCategory,
-                currentProducts: this.state.items,
-                selectedProducts: this.state.selectedProducts,
-                selectedCount: this.state.selectedCount,
-                attrsToHide: ["category", "price", "id"],
-                changeSelectedCount: this.changeSelectedCount,
-                showProductList: this.showProductList,
-                showProductDetails: this.showProductDetails
-              }}>
-                {content}
-              </ProductListContext.Provider>
-
-            </div>
-          </UserStatusContext.Provider>
-        </div>
-        <Footer />
-      </div>
+      <>
+        <Menu categories={categories}/>
+        <ProductList />
+      </>
     );
   }
-}
+
+  return (
+    <div className="app">
+      <div className="wrapper">
+        <UserStatusContext.Provider
+          value={{
+            isLoggedIn,
+            setLoggedInValue: (value) => handleLoginChange(value),
+          }}
+        >
+          <Header key={isLoggedIn} />
+          <div className="pageContent">
+            <ProductListContext.Provider
+              value={{
+                categoryName: currentCategory,
+                allCategories: allCategories,
+                products: items,
+                selectedProducts,
+                selectedCount,
+                attrsToHide: ['category', 'price', 'id'],
+                setSelectedCount: setSelectedCount
+              }}
+            >
+              <Routes>
+                <Route
+                  path={`categories/:categoryName`}
+                  element={<CategoryPage categories={allCategories}/>}
+                />
+                <Route
+                  path={`categories`}
+                  element={<CategoryPage categories={allCategories}/>} />
+                <Route
+                  path={'products/:id'}
+                  element={<ProductDetails></ProductDetails>} />
+                <Route
+                  path={"*"}
+                  element={ <Navigate to={'/categories'} /> } />
+              </Routes>
+            </ProductListContext.Provider>
+          </div>
+        </UserStatusContext.Provider>
+      </div>
+      <Footer />
+    </div>
+  );
+};
 
 export default App;
+

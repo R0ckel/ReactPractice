@@ -1,14 +1,16 @@
 import React from 'react';
 import {ProductListContext} from "../../contexts/productListContext";
 
-function ListHeader() {
+function ListHeader(props) {
+  const { shown, category } = props;
+
   return (
     <ProductListContext.Consumer>
-      {({categoryName, selectedCount, currentProducts})=>{
+      {({selectedCount})=>{
         return (
           <div className='listHeader'>
-            <span className='warning'>{categoryName}</span>
-            <span className='centered'>Shown: {currentProducts.length}</span>
+            <span className='warning'>{category}</span>
+            <span className='centered'>Shown: {shown}</span>
             <span className='aright'>Selected: {selectedCount}</span>
           </div>
         )
