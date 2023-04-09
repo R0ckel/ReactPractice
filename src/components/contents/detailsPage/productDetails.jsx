@@ -3,21 +3,21 @@ import {KeyValueTable} from '../../dataTable/keyValueTable';
 import {CommentForm} from './commentForm';
 import {PriceConverter} from './priceConverter';
 import {ProductListContext} from "../../../contexts/productListContext";
-import {Link, Navigate, useParams} from "react-router-dom";
+import {Link, Navigate, useLocation, useParams} from "react-router-dom";
 
-export default function ProductDetails (){
-  const { id } = useParams()
-  const { products } = useContext(ProductListContext)
+export default function ProductDetails () {
+  const {id} = useParams()
+  const location = useLocation()
+  const {products} = useContext(ProductListContext)
 
-  console.log(id)
-  console.log(products)
+  console.debug(location.pathname)
+
   let product = products.find(x => x.id.toString() === id)
-  if (product === undefined){
+  if (product === undefined) {
     return <Navigate to={'/'}></Navigate>
   }
 
-  console.log(product)
-  return(
+  return (
     <main>
       <Link to={`/categories/${product.category}`}>
         <button className='btn white'>

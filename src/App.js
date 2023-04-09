@@ -1,13 +1,12 @@
 import './css/App.css';
 import Header from './components/layout/header/header'
 import Footer from './components/layout/footer';
-import ProductList from './components/contents/categoryProductList/productList';
-import Menu from './components/layout/menu';
 import {UserStatusContext} from "./contexts/userStatus.context";
 import {ProductListContext} from "./contexts/productListContext";
 import {Navigate, Route, Routes} from "react-router-dom";
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import ProductDetails from "./components/contents/detailsPage/productDetails";
+import {CategoryPage} from "./components/contents/categoryProductList/categoryPage";
 
 
 const allItems = [
@@ -135,15 +134,6 @@ const App = ({ isLoggedIn: isLoggedInProp = true }) => {
   //   setContentType('productList');
   //   setCurrentCategory(category);
   // }
-
-  function CategoryPage({ categories }) {
-    return (
-      <>
-        <Menu categories={categories}/>
-        <ProductList />
-      </>
-    );
-  }
 
   return (
     <div className="app">
