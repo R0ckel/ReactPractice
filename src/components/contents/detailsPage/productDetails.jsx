@@ -4,6 +4,7 @@ import {CommentForm} from './commentForm';
 import {PriceConverter} from './priceConverter';
 import {ProductListContext} from "../../../contexts/productListContext";
 import {Link, Navigate, useLocation, useParams} from "react-router-dom";
+import styles from '../../../css/app.module.css';
 
 export default function ProductDetails () {
   const {id} = useParams()
@@ -20,7 +21,7 @@ export default function ProductDetails () {
   return (
     <main>
       <Link to={`/categories/${product.category}`}>
-        <button className='btn white'>
+        <button className={`${styles.btn} ${styles.white}`}>
           &larr; Back to category
         </button>
       </Link>
@@ -34,7 +35,6 @@ export default function ProductDetails () {
       <h2>PriceConverter</h2>
       <PriceConverter price={product.price}/>
 
-      <br/>
       <CommentForm/>
     </main>
   )

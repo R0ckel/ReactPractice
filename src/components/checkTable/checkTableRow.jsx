@@ -2,13 +2,15 @@ import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {UserStatusContext} from "../../contexts/userStatus.context";
 import {ProductListContext} from "../../contexts/productListContext";
 import {Link} from "react-router-dom";
+import styles from "../../css/app.module.css";
+import checkboxStyle from "../../css/checkbox.module.css"
 
 export function useChecked(selectedList, setSelectedCount, selectedCount, id) {
   const [checked, setChecked] = useState(selectedList[id]);
 
   const updateCheck = useCallback(() => {
     selectedList[id] = !selectedList[id];
-    setSelectedCount(selectedList[id]? selectedCount + 1 : selectedCount - 1)
+    setSelectedCount(selectedList[id] ? selectedCount + 1 : selectedCount - 1)
     setChecked((prevState) => !prevState);
   }, [id, selectedList, setSelectedCount, selectedCount]);
 
@@ -57,14 +59,14 @@ const CheckTableRow = React.memo(function CheckTableRow(props) {
               updateCheck();
             };
             return (
-              <div className="checkbox-wrapper">
+              <div className={checkboxStyle["checkbox-wrapper"]}>
                 <input
                   type="checkbox"
                   id={item.id + "_checkbox"}
                   defaultChecked={checked}
                   disabled={!status.isLoggedIn}
                 />
-                <label htmlFor={item.id + "_checkbox"} className="check-box"
+                <label htmlFor={item.id + "_checkbox"} className={checkboxStyle["check-box"]}
                        onClick={handleCheck}></label>
               </div>
             );
@@ -73,7 +75,7 @@ const CheckTableRow = React.memo(function CheckTableRow(props) {
       </td>
       <td>
         <Link to={`/products/${item.id}`}>
-          <button className="btn info dynamic">
+          <button className={`${styles.btn} ${styles.info} ${styles.dynamic}`}>
             Details
           </button>
         </Link>

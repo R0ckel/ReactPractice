@@ -1,5 +1,6 @@
 import React from 'react';
 import {ProductListContext} from "../../contexts/productListContext";
+import styles from "../../css/app.module.css"
 
 export default function CheckTableHeader (props) {
 	const {template} = props;
@@ -16,7 +17,7 @@ export default function CheckTableHeader (props) {
 			tableCells.push("Checked");
 			tableCells.push("Action");
 			return(
-				<thead className='capitalize'>
+				<thead className={`${styles.capitalize}`}>
 				<tr>
 					{tableCells.map(tableCell => (
 						<th key={template.id + tableCell}>{tableCell}</th>

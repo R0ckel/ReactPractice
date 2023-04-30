@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import MenuItem from './menuItem';
 import {useParams} from "react-router-dom";
+import styles from '../../css/app.module.css'
 
 const Menu = ({categories}) => {
   const {categoryName} = useParams()
@@ -25,16 +26,16 @@ const Menu = ({categories}) => {
   };
 
   return (
-    <div className="menu">
-      <ul className="menuList">
-        {categories.map((category) => (
-          <MenuItem item={category}
-                    currentCategory={currentCategory}
-                    key={category.id}
-                    updater={updateMenu} />
-        ))}
-      </ul>
-    </div>
+	  <div className={styles.menu}>
+		  <ul className={styles.menuList}>
+			  {categories.map((category) => (
+				  <MenuItem item={category}
+				            currentCategory={currentCategory}
+				            key={category.id}
+				            updater={updateMenu}/>
+			  ))}
+		  </ul>
+	  </div>
   );
 };
 

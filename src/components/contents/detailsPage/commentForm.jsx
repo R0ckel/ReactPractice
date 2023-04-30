@@ -1,46 +1,71 @@
-import { useState } from "react";
+import {useState} from "react";
+import {CSSTransition} from "react-transition-group";
+import modalStyles from "../../../css/modal.module.css";
+import appStyles from "../../../css/app.module.css";
+import helperStyles from '../../../css/helpers.module.css';
 
 function useCommentForm() {
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
-  function handleSubmit() {
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (comment.trim().length === 0) {
+      setModalMessage("Empty comment text is not valid. Please enter your comment.");
+      setModalOpen(true);
+      return;
+    }
     console.log(comment);
-    alert(`Your comment: "${comment}" was successfully added`);
+    setModalMessage(`Your comment: "${comment}" was successfully added`);
+    setModalOpen(true);
+    clearComment();
   }
 
   function handleChange(event) {
     setComment(event.target.value);
   }
 
-  function clearComment(){
-    setComment('')
+  function clearComment() {
+    setComment("");
   }
 
-  return { comment, clearComment, handleSubmit, handleChange };
+  function handleModalClose() {
+    setModalOpen(false);
+  }
+
+  return {comment, handleSubmit, handleChange, modalOpen, modalMessage, handleModalClose};
 }
 
 export function CommentForm() {
-  const { comment, clearComment, handleSubmit, handleChange } = useCommentForm();
-
-  function onSubmit(event) {
-    event.preventDefault();
-    if (comment.trim().length === 0) {
-      alert("Empty comment text is not valid. Please enter your comment.");
-      return;
-    }
-    handleSubmit();
-    clearComment();
-  }
+  const {comment, handleSubmit, handleChange, modalOpen, modalMessage, handleModalClose} = useCommentForm();
 
   return (
-    <form onSubmit={onSubmit}>
-      <label>Enter your comment:</label>
-      <textarea
-        value={comment}
-        onChange={handleChange}
-        placeholder="Your comment here..."
-      />
-      <input type="submit" value="Send" />
-    </form>
+    <>
+      <div className={helperStyles["center-wrapper"]}>
+        <CSSTransition in={modalOpen} timeout={300} classNames={{
+          enter: modalStyles["modal-enter"],
+          enterActive: modalStyles["modal-enter-active"],
+          exit: modalStyles["modal-exit"],
+          exitActive: modalStyles["modal-exit-active"]
+        }} unmountOnExit>
+          <div className={modalStyles.modal}>
+            <h3>{modalMessage}</h3>
+            <button onClick={handleModalClose} className={appStyles.btn}>Close</button>
+          </div>
+        </CSSTransition>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <label>Enter your comment:</label>
+        <textarea
+          value={comment}
+          onChange={handleChange}
+          placeholder="Your comment here..."
+          disabled={modalOpen}
+        />
+        <input type="submit" value="Send" disabled={modalOpen}/>
+      </form>
+    </>
   );
 }

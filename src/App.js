@@ -1,4 +1,3 @@
-import './css/App.css';
 import Header from './components/layout/header/header'
 import Footer from './components/layout/footer';
 import {UserStatusContext} from "./contexts/userStatus.context";
@@ -7,7 +6,7 @@ import {Navigate, Route, Routes} from "react-router-dom";
 import React, {useState} from 'react';
 import ProductDetails from "./components/contents/detailsPage/productDetails";
 import {CategoryPage} from "./components/contents/categoryProductList/categoryPage";
-
+import styles from './css/app.module.css';
 
 const allItems = [
   {
@@ -119,33 +118,17 @@ const App = ({ isLoggedIn: isLoggedInProp = true }) => {
     return categories;
   }
 
-  // function showProductDetails(id) {
-  //   setItems(allItems.filter((x) => x.id === id));
-  //   setContentType('productDetails');
-  //   const lastCategory = allItems.filter((x) => x.id === id)[0].category;
-  //   setCurrentCategory(lastCategory);
-  // }
-
-  // function showProductList(category = null) {
-  //   if (category === null) {
-  //     category = currentCategory;
-  //   }
-  //   setItems(allItems.filter((x) => x.category === category));
-  //   setContentType('productList');
-  //   setCurrentCategory(category);
-  // }
-
   return (
-    <div className="app">
-      <div className="wrapper">
+    <div className={styles.app}>
+      <div className={styles.wrapper}>
         <UserStatusContext.Provider
           value={{
             isLoggedIn,
             setLoggedInValue: (value) => handleLoginChange(value),
           }}
         >
-          <Header key={isLoggedIn} />
-          <div className="pageContent">
+          <Header key={isLoggedIn}/>
+          <div className={styles.pageContent}>
             <ProductListContext.Provider
               value={{
                 categoryName: currentCategory,

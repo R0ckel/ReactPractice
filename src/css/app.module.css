@@ -58,9 +58,17 @@ header > * {
 .success {color: green;}
 .info {color: dodgerblue;}
 .warning {color: orange;}
-.danger {color: red;}
-.default {color: black;}
-.white {color: white;}
+.danger {
+  color: red;
+}
+
+.dark {
+  color: black;
+}
+
+.white {
+  color: white;
+}
 
 html, body, #root, .app {
     height: 100%;
