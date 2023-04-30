@@ -79,11 +79,12 @@ const allItems = [
   }
 ];
 
-const App = ({ isLoggedIn: isLoggedInProp = true }) => {
+const App = ({isLoggedIn: isLoggedInProp = false}) => {
   const allCategories = getItemsCategoryList(allItems)
-  const [items, ] = useState(allItems);
+  const [items,] = useState(allItems);
   const [isLoggedIn, setIsLoggedIn] = useState(isLoggedInProp);
-  const [currentCategory, ] = useState(allCategories[0].name);
+  const [username, setUsername] = useState("");
+  const [currentCategory,] = useState(allCategories[0].name);
   const [selectedProducts, setSelectedProducts] = useState(initSelectedProducts());
   const [selectedCount, setSelectedCount] = useState(0);
 
@@ -95,8 +96,9 @@ const App = ({ isLoggedIn: isLoggedInProp = true }) => {
     return { ...selected };
   }
 
-  function handleLoginChange(value) {
+  function handleLoginChange(value, username = "") {
     setIsLoggedIn(value);
+    setUsername(username)
     setSelectedCount(0);
     setSelectedProducts(initSelectedProducts());
   }
@@ -124,7 +126,8 @@ const App = ({ isLoggedIn: isLoggedInProp = true }) => {
         <UserStatusContext.Provider
           value={{
             isLoggedIn,
-            setLoggedInValue: (value) => handleLoginChange(value),
+            setLoggedInValue: (value, username) => handleLoginChange(value, username),
+            username
           }}
         >
           <Header key={isLoggedIn}/>
