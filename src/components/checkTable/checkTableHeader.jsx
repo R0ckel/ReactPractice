@@ -16,15 +16,18 @@ export default function CheckTableHeader (props) {
 			}
 			tableCells.push("Checked");
 			tableCells.push("Action");
-			return(
-				<thead className={`${styles.capitalize}`}>
-				<tr>
-					{tableCells.map(tableCell => (
-						<th key={template.id + tableCell}>{tableCell}</th>
-					))}
-				</tr>
-				</thead>
-			)
+			if (template) {
+				return (
+					<thead className={`${styles.capitalize}`}>
+					<tr>
+						{tableCells.map(tableCell => (
+							<th key={template.id + tableCell}>{tableCell}</th>
+						))}
+					</tr>
+					</thead>
+				)
+			}
+			return <></>
 		}}
 	</ProductListContext.Consumer>
 }

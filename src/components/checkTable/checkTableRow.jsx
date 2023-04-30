@@ -41,8 +41,8 @@ const CheckTableRow = React.memo(function CheckTableRow(props) {
 
   const cells = Object.entries(item)
   .filter(([key]) => !attrsToHide.includes(key))
-  .map(([, val]) => (
-    <td key={`${item.id}${val}`}>{val}</td>
+  .map(([key, val]) => (
+	  <td key={`${item.id}${key}${val}`}>{val}</td>
   ));
 
   return (

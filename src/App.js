@@ -7,6 +7,8 @@ import React, {useState} from 'react';
 import ProductDetails from "./components/contents/detailsPage/productDetails";
 import {CategoryPage} from "./components/contents/categoryProductList/categoryPage";
 import styles from './css/app.module.css';
+import {MenuItemsContext} from "./contexts/menuItemsContext";
+import {AdminProductsPage} from "./components/contents/adminProductsView/adminProductsPage";
 
 const allItems = [
   {
@@ -81,7 +83,7 @@ const allItems = [
 
 const App = ({isLoggedIn: isLoggedInProp = false}) => {
   const allCategories = getItemsCategoryList(allItems)
-  const [items,] = useState(allItems);
+  const [items, setItems] = useState(allItems);
   const [isLoggedIn, setIsLoggedIn] = useState(isLoggedInProp);
   const [username, setUsername] = useState("");
   const [currentCategory,] = useState(allCategories[0].name);
@@ -110,7 +112,7 @@ const App = ({isLoggedIn: isLoggedInProp = false}) => {
       if (categories.filter((x) => x.name === el.category).length === 0) {
         categories.push({
           name: el.category,
-          id: `${el.category}_id${i}${i === 0 ? 'T' : 'F'}`,
+          key: `${el.category}_id${i}${i === 0 ? 'T' : 'F'}`,
           index: i,
           chosen: i === 0,
         });
@@ -118,6 +120,22 @@ const App = ({isLoggedIn: isLoggedInProp = false}) => {
       }
     }
     return categories;
+  }
+
+  function CategoryPageWrapper() {
+    return (
+      <MenuItemsContext.Provider value={{items: allCategories, baseUrl: "/categories"}}>
+        <CategoryPage/>
+      </MenuItemsContext.Provider>
+    );
+  }
+
+  function AdminCategoryPageWrapper() {
+    return (
+      <MenuItemsContext.Provider value={{items: allCategories, baseUrl: "/admin/products"}}>
+        <AdminProductsPage/>
+      </MenuItemsContext.Provider>
+    );
   }
 
   return (
@@ -137,6 +155,7 @@ const App = ({isLoggedIn: isLoggedInProp = false}) => {
                 categoryName: currentCategory,
                 allCategories: allCategories,
                 products: items,
+                setProducts: (products) => setItems(products),
                 selectedProducts,
                 selectedCount,
                 attrsToHide: ['category', 'price', 'id'],
@@ -144,19 +163,13 @@ const App = ({isLoggedIn: isLoggedInProp = false}) => {
               }}
             >
               <Routes>
-                <Route
-                  path={`categories/:categoryName`}
-                  element={<CategoryPage categories={allCategories}/>}
-                />
-                <Route
-                  path={`categories`}
-                  element={<CategoryPage categories={allCategories}/>} />
-                <Route
-                  path={'products/:id'}
-                  element={<ProductDetails></ProductDetails>} />
-                <Route
-                  path={"*"}
-                  element={ <Navigate to={'/categories'} /> } />
+                <Route path={`categories/:categoryName`} element={<CategoryPageWrapper/>}/>
+                <Route path={`categories`} element={<CategoryPageWrapper/>}/>
+
+                <Route path={`admin/products`} element={<AdminCategoryPageWrapper/>}/>
+
+                <Route path={'products/:id'} element={<ProductDetails/>}/>
+                <Route path={"*"} element={<Navigate to={'/categories'}/>}/>
               </Routes>
             </ProductListContext.Provider>
           </div>

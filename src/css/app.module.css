@@ -36,8 +36,12 @@ header > * {
 .headerButton{
   margin: auto;
 }
-.aright{
+.aright {
   margin-right: 10px;
+}
+
+.aleft {
+  margin-left: 10px;
 }
 
 .btn {

@@ -1,13 +1,15 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {Link} from 'react-router-dom';
 import styles from '../../css/app.module.css'
+import {MenuItemsContext} from "../../contexts/menuItemsContext";
 
 function MenuItem(props) {
-  const { item, currentCategory } = props;
+	const {baseUrl} = useContext(MenuItemsContext)
+	const {item, currentCategory} = props;
   const chosen = currentCategory === item
 
   return (
-	  <Link to={`/categories/${item.name}`} className={styles.noLink}>
+	  <Link to={`${baseUrl}/${item.name}`} className={styles.noLink}>
 		  <li className={`${styles.menuItem} ${chosen ? styles.chosen : styles.dynamic}`}>
 			  <input type='radio' name='mainMenu' value={item} defaultChecked={chosen} key={item.id} id={item.id}/>
 			  <label htmlFor={item.id}>{item.name}</label>

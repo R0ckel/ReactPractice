@@ -1,11 +1,13 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import MenuItem from './menuItem';
 import {useParams} from "react-router-dom";
 import styles from '../../css/app.module.css'
+import {MenuItemsContext} from "../../contexts/menuItemsContext";
 
-const Menu = ({categories}) => {
+const Menu = () => {
   const {categoryName} = useParams()
-  const currentCategory = Object.values(categories).flat().find((x) => x.name === categoryName);
+  const {items} = useContext(MenuItemsContext)
+  const currentCategory = Object.values(items).flat().find((x) => x.name === categoryName);
   const [, setChosenIndex] = useState(currentCategory?.index);
 
   if (currentCategory === undefined) {
@@ -18,7 +20,7 @@ const Menu = ({categories}) => {
   };
 
   const updateMenu = (categoryIndex) => {
-    categories.forEach((item) => {
+    items.forEach((item) => {
       item.chosen = item.index === categoryIndex;
       updateKey(item);
     });
@@ -27,14 +29,14 @@ const Menu = ({categories}) => {
 
   return (
 	  <div className={styles.menu}>
-		  <ul className={styles.menuList}>
-			  {categories.map((category) => (
-				  <MenuItem item={category}
-				            currentCategory={currentCategory}
-				            key={category.id}
-				            updater={updateMenu}/>
-			  ))}
-		  </ul>
+      <ul className={styles.menuList}>
+        {items.map((item) => (
+          <MenuItem item={item}
+                    currentCategory={currentCategory}
+                    key={item.key}
+                    updater={updateMenu}/>
+        ))}
+      </ul>
 	  </div>
   );
 };

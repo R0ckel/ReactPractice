@@ -62,7 +62,7 @@ const LoginButton = () => {
         message.error('Invalid login credentials');
       }
       setIsLoading(false);
-    }, 3000);
+    }, 1000);
   };
 
   const showModal = () => {
