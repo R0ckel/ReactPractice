@@ -6,11 +6,11 @@ export default function CheckTableHeader (props) {
 	const {template} = props;
 
 	return <ProductListContext.Consumer>
-		{({attrsToHide})=>{
+		{({cardViewFields}) => {
 			const tableCells = [];
 			for (const key in template) {
 				if (Object.hasOwnProperty.call(template, key)
-					&& !attrsToHide.includes(key)) {
+					&& cardViewFields.includes(key)) {
 					tableCells.push(key);
 				}
 			}

@@ -9,7 +9,6 @@ export function AdminProductsPage() {
 
 	return (
 		<>
-			{/*<Menu />*/}
 			<ProductListAdminView/>
 		</>
 	);

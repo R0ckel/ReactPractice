@@ -24,7 +24,7 @@ export function useChecked(selectedList, setSelectedCount, selectedCount, id) {
 }
 
 const CheckTableRow = React.memo(function CheckTableRow(props) {
-  const {selectedProducts, attrsToHide, setSelectedCount, selectedCount} = useContext(ProductListContext);
+  const {selectedProducts, cardViewFields, setSelectedCount, selectedCount} = useContext(ProductListContext);
   const {item} = props;
   const { checked, updateCheck } = useChecked(
     selectedProducts, setSelectedCount, selectedCount, item.id
@@ -40,7 +40,7 @@ const CheckTableRow = React.memo(function CheckTableRow(props) {
 
 
   const cells = Object.entries(item)
-  .filter(([key]) => !attrsToHide.includes(key))
+  .filter(([key]) => cardViewFields.includes(key))
   .map(([key, val]) => (
 	  <td key={`${item.id}${key}${val}`}>{val}</td>
   ));

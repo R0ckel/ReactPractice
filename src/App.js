@@ -82,8 +82,8 @@ const allItems = [
 ];
 
 const App = ({isLoggedIn: isLoggedInProp = false}) => {
-  const allCategories = getItemsCategoryList(allItems)
   const [items, setItems] = useState(allItems);
+  const allCategories = getItemsCategoryList(items)
   const [isLoggedIn, setIsLoggedIn] = useState(isLoggedInProp);
   const [username, setUsername] = useState("");
   const [currentCategory,] = useState(allCategories[0].name);
@@ -130,14 +130,6 @@ const App = ({isLoggedIn: isLoggedInProp = false}) => {
     );
   }
 
-  function AdminCategoryPageWrapper() {
-    return (
-      <MenuItemsContext.Provider value={{items: allCategories, baseUrl: "/admin/products"}}>
-        <AdminProductsPage/>
-      </MenuItemsContext.Provider>
-    );
-  }
-
   return (
     <div className={styles.app}>
       <div className={styles.wrapper}>
@@ -158,7 +150,8 @@ const App = ({isLoggedIn: isLoggedInProp = false}) => {
                 setProducts: (products) => setItems(products),
                 selectedProducts,
                 selectedCount,
-                attrsToHide: ['category', 'price', 'id'],
+                // attrsToHide: ['category', 'price', 'id'],
+                cardViewFields: ['mark', 'model'],
                 setSelectedCount: setSelectedCount
               }}
             >
@@ -166,7 +159,7 @@ const App = ({isLoggedIn: isLoggedInProp = false}) => {
                 <Route path={`categories/:categoryName`} element={<CategoryPageWrapper/>}/>
                 <Route path={`categories`} element={<CategoryPageWrapper/>}/>
 
-                <Route path={`admin/products`} element={<AdminCategoryPageWrapper/>}/>
+                <Route path={`admin/products`} element={<AdminProductsPage/>}/>
 
                 <Route path={'products/:id'} element={<ProductDetails/>}/>
                 <Route path={"*"} element={<Navigate to={'/categories'}/>}/>

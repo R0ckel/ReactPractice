@@ -180,7 +180,7 @@ export const ProductListAdminView = () => {
 			{tableView ? (
 				<>
 					<Table dataSource={products} columns={columns} rowKey="id"
-					       style={{backgroundColor: 'rgba(255,255,255,0.35)'}}/>
+					       style={{backgroundColor: 'rgba(255,255,255,0.5)'}}/>
 					{productForm}
 				</>
 			) : (

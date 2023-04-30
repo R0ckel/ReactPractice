@@ -8,7 +8,8 @@ export const ProductListContext = React.createContext({
 		this.products = products
 	},
 	selectedProducts: [],
-	attrsToHide: [],
+	// attrsToHide: [],
+	cardViewFields: [],
 	selectedCount: 0,
 	setSelectedCount: () => {
 	}
