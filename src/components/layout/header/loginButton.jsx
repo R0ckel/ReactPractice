@@ -2,7 +2,10 @@ import styles from "../../../css/app.module.css";
 import {useContext, useState} from "react";
 import {UserStatusContext} from "../../../contexts/userStatus.context";
 import styled from "styled-components";
-import {Button, Form, Input, message, Modal} from 'antd';
+
+import {Field, Form, Formik} from 'formik';
+import * as Yup from 'yup';
+import {Button, Input, message, Modal} from 'antd';
 
 const NameSpan = styled.span`
   margin: 0 2vw;
@@ -34,11 +37,57 @@ const StatusButton = styled.button`
 
 const StyledStatusButton = styled(StatusButton)`
   border: ${props => props.loggedIn ? '1px dotted crimson' : '3px double white'};
+  margin-left: 10px;
 `
+
+const MarginedLabel = styled("label")`
+  margin: 10px 0 2px;
+`;
+
+const MarginedButton = styled(Button)`
+  margin-top: 20px;
+`;
+
+const Error = styled("div")`
+  color: red;
+`;
+
+const LoginSchema = Yup.object().shape({
+  username: Yup.string()
+  .required('Please enter your username!'),
+  password: Yup.string()
+  .required('Please enter your password!')
+});
+
+const RegistrationSchema = Yup.object().shape({
+  username: Yup.string()
+  .required('Please enter your username!')
+  .min(3, 'Username name must be at least 3 characters long')
+  .max(40, 'Username name must be at most 40 characters long'),
+  firstName: Yup.string()
+  .required('Please enter your first name!')
+  .min(3, 'First name must be at least 3 characters long')
+  .max(40, 'First name must be at most 40 characters long'),
+  lastName: Yup.string()
+  .required('Please enter your last name!')
+  .min(3, 'Last name must be at least 3 characters long')
+  .max(40, 'Last name must be at most 40 characters long'),
+  email: Yup.string()
+  .required('Please enter your email!')
+  .email('Invalid email address'),
+  password: Yup.string()
+  .required('Please enter your password!')
+  .matches(/^(?=.*[A-Z])(?=.*[^a-zA-Z])/,
+    'Password must contain at least one uppercase letter and one non-letter character'),
+  confirmPassword: Yup.string()
+  .required('Please confirm your password!')
+  .oneOf([Yup.ref('password'), null], 'Passwords must match')
+});
 
 const LoginButton = () => {
   const {isLoggedIn, username, setLoggedInValue} = useContext(UserStatusContext);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [isRegistrationModalVisible, setIsRegistrationModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   function statusHandler() {
@@ -56,21 +105,37 @@ const LoginButton = () => {
         // Set the username in the header
         // Log in the user
         setLoggedInValue(true, values.username);
-        setIsModalVisible(false);
+        setIsLoginModalVisible(false);
       } else {
         // Show an error message
-        message.error('Invalid login credentials');
+        message.error('Invalid login credentials').then(() => console.log("failed to login"));
       }
       setIsLoading(false);
     }, 1000);
   };
 
-  const showModal = () => {
-    setIsModalVisible(true);
+  const handleRegistration = (values) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      console.log('Registration values:', values);
+      // Perform registration here
+      setLoggedInValue(true, values.username);
+      setIsRegistrationModalVisible(false);
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  const showLoginModal = () => {
+    setIsLoginModalVisible(true);
+  };
+
+  const showRegistrationModal = () => {
+    setIsRegistrationModalVisible(true);
   };
 
   const handleCancel = () => {
-    setIsModalVisible(false);
+    setIsLoginModalVisible(false);
+    setIsRegistrationModalVisible(false);
   };
 
   return (
@@ -84,24 +149,103 @@ const LoginButton = () => {
         </div>
         :
         <>
-          <StyledStatusButton onClick={showModal}>
+          <StyledStatusButton onClick={showLoginModal}>
             Log in
           </StyledStatusButton>
+          <StyledStatusButton onClick={showRegistrationModal}>
+            Register
+          </StyledStatusButton>
 
-          <Modal title="Log in" open={isModalVisible} onCancel={handleCancel} footer={null}>
-            <Form onFinish={handleLogin} style={{width: '100%'}}>
-              <Form.Item name="username" rules={[{required: true, message: 'Please enter your username!'}]}>
-                <Input placeholder="Username" autoComplete="username"/>
-              </Form.Item>
-              <Form.Item name="password" rules={[{required: true, message: 'Please enter your password!'}]}>
-                <Input.Password placeholder="Password" autoComplete="current-password"/>
-              </Form.Item>
-              <Form.Item>
-                <Button type="primary" htmlType="submit" loading={isLoading}>
-                  Log in
-                </Button>
-              </Form.Item>
-            </Form>
+          <Modal title="Log in" open={isLoginModalVisible} onCancel={handleCancel} footer={null}>
+            <div style={{display: 'flex', justifyContent: 'center', overflow: 'auto'}}>
+              <Formik
+                initialValues={{username: '', password: ''}}
+                validationSchema={LoginSchema}
+                onSubmit={handleLogin}
+              >
+                {({errors, touched}) => (
+                  <Form style={{width: '100%'}}>
+                    <MarginedLabel htmlFor="username">Username</MarginedLabel>
+                    <Field name="username" as={Input} placeholder="Username" autoComplete="username"/>
+                    {errors.username && touched.username ? (
+                      <Error>{errors.username}</Error>
+                    ) : null}
+
+                    <MarginedLabel htmlFor="password">Password</MarginedLabel>
+                    <Field name="password" as={Input.Password} placeholder="Password" autoComplete="current-password"/>
+                    {errors.password && touched.password ? (
+                      <Error>{errors.password}</Error>
+                    ) : null}
+
+                    <MarginedButton type="primary" htmlType="submit" loading={isLoading}>
+                      Log in
+                    </MarginedButton>
+                  </Form>
+                )}
+              </Formik>
+            </div>
+          </Modal>
+
+          <Modal title="Register" open={isRegistrationModalVisible} onCancel={handleCancel} footer={null}>
+            <div style={{display: 'flex', justifyContent: 'center', overflow: 'auto'}}>
+              <Formik
+                initialValues={{
+                  username: '',
+                  firstName: '',
+                  lastName: '',
+                  email: '',
+                  password: '',
+                  confirmPassword: ''
+                }}
+                validationSchema={RegistrationSchema}
+                onSubmit={handleRegistration}
+              >
+                {({errors, touched}) => (
+                  <Form style={{width: '100%'}}>
+                    <MarginedLabel htmlFor="username">Username</MarginedLabel>
+                    <Field name="username" as={Input} placeholder="Nickname" autoComplete="username"/>
+                    {errors.username && touched.username ? (
+                      <Error>{errors.username}</Error>
+                    ) : null}
+
+                    <MarginedLabel htmlFor="firstName">First Name</MarginedLabel>
+                    <Field name="firstName" as={Input} placeholder="First Name" autoComplete="given-name"/>
+                    {errors.firstName && touched.firstName ? (
+                      <Error>{errors.firstName}</Error>
+                    ) : null}
+
+                    <MarginedLabel htmlFor="lastName">Last Name</MarginedLabel>
+                    <Field name="lastName" as={Input} placeholder="Last Name" autoComplete="family-name"/>
+                    {errors.lastName && touched.lastName ? (
+                      <Error>{errors.lastName}</Error>
+                    ) : null}
+
+                    <MarginedLabel htmlFor="email">Email</MarginedLabel>
+                    <Field name="email" type="email" as={Input} placeholder="Email" autoComplete="email"/>
+                    {errors.email && touched.email ? (
+                      <Error>{errors.email}</Error>
+                    ) : null}
+
+                    <MarginedLabel htmlFor="password">Password</MarginedLabel>
+                    <Field name="password" as={Input.Password} placeholder="Password" autoComplete="new-password"/>
+                    {errors.password && touched.password ? (
+                      <Error>{errors.password}</Error>
+                    ) : null}
+
+                    <MarginedLabel htmlFor="confirmPassword">Confirm Password</MarginedLabel>
+                    <Field name="confirmPassword" as={Input.Password} placeholder="Confirm Password"
+                           autoComplete="new-password"/>
+                    {errors.confirmPassword && touched.confirmPassword ? (
+                      <Error>{errors.confirmPassword}</Error>
+                    ) : null}
+
+                    <MarginedButton type="primary" htmlType="submit" loading={isLoading}>
+                      Register
+                    </MarginedButton>
+                  </Form>
+                )}
+              </Formik>
+            </div>
           </Modal>
         </>
       }
@@ -109,4 +253,4 @@ const LoginButton = () => {
   )
 }
 
-export default LoginButton
+export default LoginButton;

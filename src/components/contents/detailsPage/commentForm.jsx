@@ -1,44 +1,23 @@
-import {useState} from "react";
+import React from "react";
 import {CSSTransition} from "react-transition-group";
 import modalStyles from "../../../css/modal.module.css";
 import appStyles from "../../../css/app.module.css";
 import helperStyles from '../../../css/helpers.module.css';
+import {Field, Form, Formik} from 'formik';
+import * as Yup from 'yup';
 
-function useCommentForm() {
-  const [comment, setComment] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
+const CommentSchema = Yup.object().shape({
+  comment: Yup.string()
+  .required('No empty comments allowed')
+});
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    if (comment.trim().length === 0) {
-      setModalMessage("Empty comment text is not valid. Please enter your comment.");
-      setModalOpen(true);
-      return;
-    }
-    console.log(comment);
-    setModalMessage(`Your comment: "${comment}" was successfully added`);
-    setModalOpen(true);
-    clearComment();
-  }
-
-  function handleChange(event) {
-    setComment(event.target.value);
-  }
-
-  function clearComment() {
-    setComment("");
-  }
+export function CommentForm() {
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalMessage, setModalMessage] = React.useState("");
 
   function handleModalClose() {
     setModalOpen(false);
   }
-
-  return {comment, handleSubmit, handleChange, modalOpen, modalMessage, handleModalClose};
-}
-
-export function CommentForm() {
-  const {comment, handleSubmit, handleChange, modalOpen, modalMessage, handleModalClose} = useCommentForm();
 
   return (
     <>
@@ -56,16 +35,27 @@ export function CommentForm() {
         </CSSTransition>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <label>Enter your comment:</label>
-        <textarea
-          value={comment}
-          onChange={handleChange}
-          placeholder="Your comment here..."
-          disabled={modalOpen}
-        />
-        <input type="submit" value="Send" disabled={modalOpen}/>
-      </form>
+      <Formik
+        initialValues={{comment: ''}}
+        validationSchema={CommentSchema}
+        onSubmit={(values, {resetForm}) => {
+          console.log(values.comment);
+          setModalMessage(`Your comment: "${values.comment}" was successfully added`);
+          setModalOpen(true);
+          resetForm();
+        }}
+      >
+        {({errors, touched}) => (
+          <Form>
+            <label htmlFor="comment">Enter your comment:</label>
+            <Field name="comment" as="textarea" placeholder="Your comment here..." disabled={modalOpen}/>
+            {errors.comment && touched.comment ? (
+              <div style={{marginBottom: '10px'}}>{errors.comment}</div>
+            ) : null}
+            <input type="submit" value="Send" disabled={modalOpen}/>
+          </Form>
+        )}
+      </Formik>
     </>
   );
 }

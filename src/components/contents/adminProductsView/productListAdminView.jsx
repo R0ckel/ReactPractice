@@ -1,14 +1,41 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {Button, Form, Input, List, Modal, Switch, Table, Upload} from 'antd';
+import {Button, Input as AntdInput, List, Modal, Switch, Table, Upload} from 'antd';
 import {ProductListContext} from "../../../contexts/productListContext";
 import {DeleteOutlined, EditOutlined, PlusOutlined, UploadOutlined} from '@ant-design/icons';
+import {Form, Formik, useField} from 'formik';
+import * as Yup from 'yup';
+import styled from "styled-components";
+
+const FormikInput = ({label, ...props}) => {
+	const [field, meta] = useField(props);
+	return (
+		<>
+			<MarginedLabel>
+				{label}
+				<AntdInput {...field} {...props} />
+			</MarginedLabel>
+			{meta.touched && meta.error ? <Error>{meta.error}</Error> : null}
+		</>
+	);
+};
+
+const MarginedLabel = styled("label")`
+  margin: 10px 0 2px;
+`;
+
+const MarginedButton = styled(Button)`
+  margin-top: 20px;
+`;
+
+const Error = styled("div")`
+  color: red;
+`;
 
 export const ProductListAdminView = () => {
 	const {products, setProducts} = useContext(ProductListContext);
-	const [form] = Form.useForm();
 	const [visible, setVisible] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
-	const [imageUrl, setImageUrl] = useState("");
+	const [imageUrl, setImageUrl] = useState('');
 	const [tableView, setTableView] = useState(localStorage.getItem('tableView') === 'true');
 
 	useEffect(() => {
@@ -67,13 +94,12 @@ export const ProductListAdminView = () => {
 
 	const handleAdd = () => {
 		setEditingProduct(null);
-		form.resetFields();
+		setImageUrl('');
 		setVisible(true);
 	};
 
 	const handleEdit = (record) => {
 		setEditingProduct(record);
-		form.setFieldsValue(record);
 		setImageUrl(record.image);
 		setVisible(true);
 	};
@@ -96,10 +122,6 @@ export const ProductListAdminView = () => {
 		return false;
 	};
 
-	const handleOk = () => {
-		form.submit();
-	};
-
 	const handleCancel = () => {
 		setVisible(false);
 	};
@@ -118,34 +140,66 @@ export const ProductListAdminView = () => {
 		setVisible(false);
 	};
 
+	const maxPrice = 100500
+	const validationSchema = Yup.object({
+		category: Yup.string().required().max(40, 'Category name must be below 40 characters long'),
+		mark: Yup.string().required().max(50, 'Mark name must be below 50 characters long'),
+		model: Yup.string().required().max(100, 'Model name must be below 100 characters long'),
+		price: Yup.number().required()
+		.positive(`Price must be positive number`)
+		.max(maxPrice, `Price can\`t be above ${maxPrice}`)
+	});
+
 	const productForm = (
-		<Modal open={visible} onOk={handleOk} onCancel={handleCancel} forceRender>
-			<Form form={form} onFinish={onFinish} style={{width: '100%', marginTop: '20px'}}>
-				<Form.Item label="Category" name="category" rules={[{required: true}]}>
-					<Input/>
-				</Form.Item>
-
-				<Form.Item label="Mark" name="mark" rules={[{required: true}]}>
-					<Input/>
-				</Form.Item>
-
-				<Form.Item label="Model" name="model" rules={[{required: true}]}>
-					<Input/>
-				</Form.Item>
-
-				<Form.Item label="Price" name="price" rules={[{required: true}]}>
-					<Input type="number"/>
-				</Form.Item>
-
-				<Form.Item label="Image" name="image">
-					<div>
-						<Upload beforeUpload={handleUpload} showUploadList={false}>
-							<Button icon={<UploadOutlined/>}>Click to upload</Button>
-						</Upload>
-						{imageUrl && <img src={imageUrl} alt="Preview" style={{width: 100, height: 100}}/>}
-					</div>
-				</Form.Item>
-			</Form>
+		<Modal
+			title={"Product Form"}
+			open={visible}
+			onCancel={handleCancel}
+			forceRender
+			footer={null}
+			width={'90vw'}
+		>
+			<div style={{display: 'flex', justifyContent: 'center', width: '100%'}}>
+				<Formik
+					initialValues={{
+						category: editingProduct?.category ?? '',
+						mark: editingProduct?.mark ?? '',
+						model: editingProduct?.model ?? '',
+						price: editingProduct?.price ?? '',
+					}}
+					validationSchema={validationSchema}
+					onSubmit={onFinish}
+					enableReinitialize
+				>
+					{({handleSubmit}) => (
+						<div style={{display: 'flex', justifyContent: 'center', overflow: 'auto', width: '100%'}}>
+							<Form style={{width: '100%'}}>
+								<FormikInput label="Category" name="category"/>
+								<FormikInput label="Mark" name="mark"/>
+								<FormikInput label="Model" name="model"/>
+								<FormikInput label="Price" name="price" type="number"/>
+								<div>
+									<MarginedLabel>
+										Image:
+										<Upload beforeUpload={handleUpload} showUploadList={false}>
+											<Button icon={<UploadOutlined/>}>Click to upload</Button>
+										</Upload>
+									</MarginedLabel>
+									{imageUrl && <img src={imageUrl} alt="Preview" style={{width: 100, height: 100}}/>}
+								</div>
+								<div style={{display: 'flex', justifyContent: 'flex-end', marginTop: '1rem'}}>
+									<MarginedButton onClick={handleCancel} style={{marginRight: '1rem'}}>
+										Cancel
+									</MarginedButton>
+									<MarginedButton onClick={handleSubmit} type="primary">
+										Submit
+									</MarginedButton>
+								</div>
+							</Form>
+						</div>
+					)}
+				</Formik>
+			</div>
 		</Modal>
 	);
 
