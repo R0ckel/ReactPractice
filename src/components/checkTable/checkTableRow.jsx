@@ -1,87 +1,76 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
-import {UserStatusContext} from "../../contexts/userStatus.context";
-import {ProductListContext} from "../../contexts/productListContext";
+import React, {useCallback, useEffect, useState} from 'react';
 import {Link} from "react-router-dom";
 import styles from "../../css/app.module.css";
 import checkboxStyle from "../../css/checkbox.module.css"
+import {useDispatch, useSelector} from "react-redux";
+import {toggleProductSelected} from "../../contexts/reduxStore";
 
-export function useChecked(selectedList, setSelectedCount, selectedCount, id) {
-  const [checked, setChecked] = useState(selectedList[id]);
+export function useChecked(products, id, dispatch) {
+	const product = products.find(product => product.id === id)
+	const [checked, setChecked] = useState(product.selected ?? false);
 
-  const updateCheck = useCallback(() => {
-    selectedList[id] = !selectedList[id];
-    setSelectedCount(selectedList[id] ? selectedCount + 1 : selectedCount - 1)
-    setChecked((prevState) => !prevState);
-  }, [id, selectedList, setSelectedCount, selectedCount]);
+	const updateCheck = useCallback(() => {
+		setChecked((prevState) => !prevState);
+		dispatch(toggleProductSelected(id))
+	}, [products, id]);
 
-  useEffect(() => {
-    return () => {
-      setChecked(false);
-    };
+	useEffect(() => {
+		return () => {
+			setChecked(product.selected);
+		};
   }, []);
 
   return { checked, updateCheck };
 }
 
-const CheckTableRow = React.memo(function CheckTableRow(props) {
-  const {selectedProducts, cardViewFields, setSelectedCount, selectedCount} = useContext(ProductListContext);
-  const {item} = props;
-  const { checked, updateCheck } = useChecked(
-    selectedProducts, setSelectedCount, selectedCount, item.id
-  )
+const CheckTableRow = React.memo(function CheckTableRow({item}) {
+	const {cardViewFields, products} = useSelector(state => state.productList)
+	const dispatch = useDispatch()
+	const {isLoggedIn} = useSelector(state => state.userStatus)
+	const {checked, updateCheck} = useChecked(
+		products, item.id, dispatch
+	)
 
-  // useEffect(() => {
-  //   console.log(`Checked state for item with id ${item.id} has changed to ${checked}`);
-  //
-  //   return () => {
-  //     console.log(`Unmounting CheckTableRow with id ${item.id}`);
-  //   };
-  // }, [checked, item.id]);
+	const cells = Object.entries(item)
+	.filter(([key]) => cardViewFields.includes(key))
+	.map(([key, val]) => (
+		<td key={`${item.id}${key}${val}`}>{val}</td>
+	));
 
+	const handleCheck = () => {
+		if (!isLoggedIn) {
+			alert("You must be authorized to check products!");
+			return;
+		}
+		updateCheck();
+	};
 
-  const cells = Object.entries(item)
-  .filter(([key]) => cardViewFields.includes(key))
-  .map(([key, val]) => (
-	  <td key={`${item.id}${key}${val}`}>{val}</td>
-  ));
-
-  return (
-    <tr>
-      {cells}
-      <td>
-        <UserStatusContext.Consumer>
-          {(status) => {
-            const handleCheck = () => {
-              if (!status.isLoggedIn) {
-                alert("You must be authorized to check products!");
-                return;
-              }
-              updateCheck();
-            };
-            return (
-              <div className={checkboxStyle["checkbox-wrapper"]}>
-                <input
-                  type="checkbox"
-                  id={item.id + "_checkbox"}
-                  defaultChecked={checked}
-                  disabled={!status.isLoggedIn}
-                />
-                <label htmlFor={item.id + "_checkbox"} className={checkboxStyle["check-box"]}
-                       onClick={handleCheck}></label>
-              </div>
-            );
-          }}
-        </UserStatusContext.Consumer>
-      </td>
-      <td>
-        <Link to={`/products/${item.id}`}>
-          <button className={`${styles.btn} ${styles.info} ${styles.dynamic}`}>
-            Details
-          </button>
-        </Link>
-      </td>
-    </tr>
-  );
+	return (
+		<tr>
+			{cells}
+			<td>
+				<div className={checkboxStyle["checkbox-wrapper"]}>
+					<input
+						type="checkbox"
+						id={item.id + "_checkbox"}
+						defaultChecked={checked}
+						disabled={!isLoggedIn}
+					/>
+					<label htmlFor={item.id + "_checkbox"}
+					       className={checkboxStyle["check-box"]}
+					       onClick={handleCheck}>
+					</label>
+				</div>
+			</td>
+			<td>
+				<Link to={`/products/${item.id}`}>
+					<button className={`${styles.btn} ${styles.info} ${styles.dynamic}`}>
+						Details
+					</button>
+				</Link>
+			</td>
+		</tr>
+	);
 });
 
 

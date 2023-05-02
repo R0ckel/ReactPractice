@@ -1,55 +1,60 @@
 import CheckTableRow from '../../checkTable/checkTableRow';
 import ListHeader from '../../checkTable/listHeader';
 import CheckTableHeader from '../../checkTable/checkTableHeader';
-import React, {useContext, useEffect, useState} from 'react';
-import {ProductListContext} from "../../../contexts/productListContext";
-import {Navigate, useLocation, useParams} from "react-router-dom";
+import React, {useEffect, useState} from 'react';
+import {Navigate, useParams} from "react-router-dom";
 import styles from "../../../css/app.module.css";
 import animatedItemStyles from '../../../css/animatedItem.module.css';
 import styled from 'styled-components';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
 import helperStyles from '../../../css/helpers.module.css';
+import {useDispatch, useSelector} from "react-redux";
+import {addProduct, getProductCategories} from "../../../contexts/reduxStore";
 
 export default function ProductList() {
 	const {categoryName} = useParams();
-	const location = useLocation();
-	const {products, selectedProducts, allCategories} = useContext(ProductListContext);
-	const [productList, setProductList] = useState(products.filter(x => x.category === categoryName));
+	const dispatch = useDispatch();
+	const {products} = useSelector(state => state.productList)
+	const [productsOfCategory, setProductsOfCategory] = useState(products.filter(x => x.category === categoryName));
+	const allCategories = useSelector(getProductCategories);
+	const {baseUrl} = useSelector(state => state.baseAppUrl)
 
 	const handleAddProduct = () => {
 		const mark = prompt('Enter the mark of the new product:');
 		if (!mark) return;
 		const model = prompt('Enter the model of the new product:');
 		if (mark && model) {
-			const newId = products.length + 1;
-			const newProduct = {id: newId, mark, model, category: categoryName}
-			products.push(newProduct);
-			setProductList(prevList => [...prevList, newProduct]);
-
-			selectedProducts[newId] = false;
+			const newId = Math.max(...products.map((product) => product.id)) + 1;
+			const newProduct = {id: newId, mark, model, category: categoryName, selected: false}
+			dispatch(addProduct(newProduct))
+			setProductsOfCategory(prevList => [...prevList, newProduct]);
 		}
 	};
 
 	useEffect(() => {
-		setProductList(products.filter(x => x.category === categoryName));
+		setProductsOfCategory(products.filter(x => x.category === categoryName));
 	}, [categoryName, products]);
 
-	if (categoryName === undefined || !allCategories.some(cat => cat.name === categoryName)) {
-		console.log(location);
-		return <Navigate to={`/categories/${allCategories[0].name}`}/>;
+	if (categoryName === undefined || !allCategories.some(cat => cat === categoryName)) {
+		if (allCategories.length > 0) {
+			return <Navigate to={`${baseUrl}/${allCategories[0]}`}/>;
+		}
+		return (
+			<h1>NO PRODUCTS</h1>
+		)
 	}
 
 	return (
 		<main>
 			<ListHeader
-				key={productList[0]?.id ?? 0}
-				shown={productList.length}
+				key={productsOfCategory[0]?.id ?? 0}
+				shown={productsOfCategory.length}
 				category={categoryName}
 			/>
 			<table className={styles.smoothTable}>
-				<CheckTableHeader template={productList[0]}/>
+				<CheckTableHeader template={productsOfCategory[0]}/>
 				<TransitionGroup component="tbody">
-					{productList.map(item => (
+					{productsOfCategory.map(item => (
 						<CSSTransition key={item.id} timeout={500} classNames={{
 							enter: animatedItemStyles["item-enter"],
 							enterActive: animatedItemStyles["item-enter-active"],
@@ -58,7 +63,7 @@ export default function ProductList() {
 						}}>
 							<CheckTableRow
 								item={item}
-								key={item.id.toString().concat(selectedProducts[item.id])}
+								key={item.id.toString()}
 							/>
 						</CSSTransition>
 					))}

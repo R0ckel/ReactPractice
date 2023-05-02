@@ -1,17 +1,13 @@
-import React, {useContext, useState} from 'react';
+import React from 'react';
 import MenuItem from './menuItem';
 import {useParams} from "react-router-dom";
 import styles from '../../css/app.module.css'
-import {MenuItemsContext} from "../../contexts/menuItemsContext";
 
-const Menu = () => {
+const Menu = ({items}) => {
   const {categoryName} = useParams()
-  const {items} = useContext(MenuItemsContext)
-  const currentCategory = Object.values(items).flat().find((x) => x.name === categoryName);
-  const [, setChosenIndex] = useState(currentCategory?.index);
+  const currentCategory = Object.values(items).flat().find((x) => x === categoryName);
 
-  if (currentCategory === undefined) {
-    console.log("bad path...")
+  if (currentCategory === undefined && items.length > 0) {
     return <></>
   }
 
@@ -24,7 +20,6 @@ const Menu = () => {
       item.chosen = item.index === categoryIndex;
       updateKey(item);
     });
-    setChosenIndex(categoryIndex);
   };
 
   return (
@@ -33,7 +28,7 @@ const Menu = () => {
         {items.map((item) => (
           <MenuItem item={item}
                     currentCategory={currentCategory}
-                    key={item.key}
+                    key={item}
                     updater={updateMenu}/>
         ))}
       </ul>

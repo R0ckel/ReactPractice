@@ -1,10 +1,11 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Input as AntdInput, List, Modal, Switch, Table, Upload} from 'antd';
-import {ProductListContext} from "../../../contexts/productListContext";
 import {DeleteOutlined, EditOutlined, PlusOutlined, UploadOutlined} from '@ant-design/icons';
 import {Form, Formik, useField} from 'formik';
 import * as Yup from 'yup';
 import styled from "styled-components";
+import {useDispatch, useSelector} from "react-redux";
+import {addProduct, deleteProduct, updateProduct} from "../../../contexts/reduxStore";
 
 const FormikInput = ({label, ...props}) => {
 	const [field, meta] = useField(props);
@@ -32,7 +33,8 @@ const Error = styled("div")`
 `;
 
 export const ProductListAdminView = () => {
-	const {products, setProducts} = useContext(ProductListContext);
+	const {products} = useSelector(store => store.productList);
+	const dispatch = useDispatch();
 	const [visible, setVisible] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
 	const [imageUrl, setImageUrl] = useState('');
@@ -108,7 +110,7 @@ export const ProductListAdminView = () => {
 		Modal.confirm({
 			title: 'Are you sure you want to delete this product?',
 			onOk: () => {
-				setProducts(products.filter((product) => product.id !== record.id));
+				dispatch(deleteProduct(record.id));
 			},
 		});
 	};
@@ -128,14 +130,10 @@ export const ProductListAdminView = () => {
 
 	const onFinish = (values) => {
 		if (editingProduct) {
-			setProducts(
-				products.map((product) =>
-					product.id === editingProduct.id ? {...values, id: editingProduct.id, image: imageUrl} : product
-				)
-			);
+			dispatch(updateProduct({...values, id: editingProduct.id, image: imageUrl}))
 		} else {
 			const maxId = Math.max(...products.map((product) => product.id));
-			setProducts([...products, {...values, id: maxId + 1, image: imageUrl}]);
+			dispatch(addProduct({...values, id: products.length > 0 ? maxId + 1 : 1, image: imageUrl}))
 		}
 		setVisible(false);
 	};

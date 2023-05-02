@@ -1,14 +1,13 @@
 import Header from './components/layout/header/header'
 import Footer from './components/layout/footer';
-import {UserStatusContext} from "./contexts/userStatus.context";
-import {ProductListContext} from "./contexts/productListContext";
 import {Navigate, Route, Routes} from "react-router-dom";
-import React, {useState} from 'react';
+import React from 'react';
 import ProductDetails from "./components/contents/detailsPage/productDetails";
-import {CategoryPage} from "./components/contents/categoryProductList/categoryPage";
+import {ProductsPage} from "./components/contents/categoryProductList/productsPage";
 import styles from './css/app.module.css';
-import {MenuItemsContext} from "./contexts/menuItemsContext";
 import {AdminProductsPage} from "./components/contents/adminProductsView/adminProductsPage";
+import {useDispatch} from "react-redux";
+import {setBaseUrl, setCardViewFields, setLoggedInValue, setProducts} from "./contexts/reduxStore";
 
 const allItems = [
   {
@@ -81,92 +80,39 @@ const allItems = [
   }
 ];
 
-const App = ({isLoggedIn: isLoggedInProp = false}) => {
-  const [items, setItems] = useState(allItems);
-  const allCategories = getItemsCategoryList(items)
-  const [isLoggedIn, setIsLoggedIn] = useState(isLoggedInProp);
-  const [username, setUsername] = useState("");
-  const [currentCategory,] = useState(allCategories[0].name);
-  const [selectedProducts, setSelectedProducts] = useState(initSelectedProducts());
-  const [selectedCount, setSelectedCount] = useState(0);
+const App = ({isLoggedInProp = false}) => {
+  const dispatch = useDispatch()
+  dispatch(setLoggedInValue({value: isLoggedInProp, username: ''}))
+  dispatch(setCardViewFields(['mark', 'model', 'price']))
+  dispatch(setProducts(allItems.map(item => {
+    return {
+      ...item,
+      selected: false
+    };
+  })))
 
-  function initSelectedProducts() {
-    const selected = {};
-    for (let product of Object.values(allItems)) {
-      selected[product.id] = false;
-    }
-    return { ...selected };
-  }
-
-  function handleLoginChange(value, username = "") {
-    setIsLoggedIn(value);
-    setUsername(username)
-    setSelectedCount(0);
-    setSelectedProducts(initSelectedProducts());
-  }
-
-  function getItemsCategoryList(eList) {
-    let i = 0;
-    const categories = [];
-    for (const el of eList) {
-      if (categories.filter((x) => x.name === el.category).length === 0) {
-        categories.push({
-          name: el.category,
-          key: `${el.category}_id${i}${i === 0 ? 'T' : 'F'}`,
-          index: i,
-          chosen: i === 0,
-        });
-        i++;
-      }
-    }
-    return categories;
-  }
-
-  function CategoryPageWrapper() {
+  function ProductsPageWrapper() {
+    dispatch(setBaseUrl('/productCategories'));
     return (
-      <MenuItemsContext.Provider value={{items: allCategories, baseUrl: "/categories"}}>
-        <CategoryPage/>
-      </MenuItemsContext.Provider>
+      <ProductsPage/>
     );
   }
 
   return (
     <div className={styles.app}>
       <div className={styles.wrapper}>
-        <UserStatusContext.Provider
-          value={{
-            isLoggedIn,
-            setLoggedInValue: (value, username) => handleLoginChange(value, username),
-            username
-          }}
-        >
-          <Header key={isLoggedIn}/>
-          <div className={styles.pageContent}>
-            <ProductListContext.Provider
-              value={{
-                categoryName: currentCategory,
-                allCategories: allCategories,
-                products: items,
-                setProducts: (products) => setItems(products),
-                selectedProducts,
-                selectedCount,
-                // attrsToHide: ['category', 'price', 'id'],
-                cardViewFields: ['mark', 'model'],
-                setSelectedCount: setSelectedCount
-              }}
-            >
-              <Routes>
-                <Route path={`categories/:categoryName`} element={<CategoryPageWrapper/>}/>
-                <Route path={`categories`} element={<CategoryPageWrapper/>}/>
+        <Header key={'header'}/>
+        <div className={styles.pageContent}>
+          <Routes>
+            <Route path={`productCategories/:categoryName`} element={<ProductsPageWrapper/>}/>
+            <Route path={`productCategories`} element={<ProductsPageWrapper/>}/>
 
-                <Route path={`admin/products`} element={<AdminProductsPage/>}/>
+            <Route path={`admin/products`} element={<AdminProductsPage/>}/>
 
-                <Route path={'products/:id'} element={<ProductDetails/>}/>
-                <Route path={"*"} element={<Navigate to={'/categories'}/>}/>
-              </Routes>
-            </ProductListContext.Provider>
+            <Route path={'products/:id'} element={<ProductDetails/>}/>
+            <Route path={"*"} element={<Navigate to={'/productCategories'}/>}/>
+          </Routes>
           </div>
-        </UserStatusContext.Provider>
       </div>
       <Footer />
     </div>

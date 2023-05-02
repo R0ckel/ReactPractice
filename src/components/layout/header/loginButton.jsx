@@ -1,11 +1,12 @@
 import styles from "../../../css/app.module.css";
-import {useContext, useState} from "react";
-import {UserStatusContext} from "../../../contexts/userStatus.context";
+import {useState} from "react";
 import styled from "styled-components";
 
 import {Field, Form, Formik} from 'formik';
 import * as Yup from 'yup';
 import {Button, Input, message, Modal} from 'antd';
+import {useDispatch, useSelector} from "react-redux";
+import {setLoggedInValue} from "../../../contexts/reduxStore";
 
 const NameSpan = styled.span`
   margin: 0 2vw;
@@ -81,17 +82,18 @@ const RegistrationSchema = Yup.object().shape({
     'Password must contain at least one uppercase letter and one non-letter character'),
   confirmPassword: Yup.string()
   .required('Please confirm your password!')
-  .oneOf([Yup.ref('password'), null], 'Passwords must match')
+  .oneOf([Yup.ref('password')], 'Passwords must match')
 });
 
 const LoginButton = () => {
-  const {isLoggedIn, username, setLoggedInValue} = useContext(UserStatusContext);
+  const {isLoggedIn, username} = useSelector(state => state.userStatus);
+  const dispatch = useDispatch()
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isRegistrationModalVisible, setIsRegistrationModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  function statusHandler() {
-    setLoggedInValue(!isLoggedIn)
+  function handleLogOut() {
+    dispatch(setLoggedInValue({value: false, username: ''}))
   }
 
   const handleLogin = (values) => {
@@ -104,11 +106,11 @@ const LoginButton = () => {
         && values.password.length > 3) {
         // Set the username in the header
         // Log in the user
-        setLoggedInValue(true, values.username);
+        dispatch(setLoggedInValue({value: true, username: values.username}));
         setIsLoginModalVisible(false);
       } else {
         // Show an error message
-        message.error('Invalid login credentials').then(() => console.log("failed to login"));
+        message.error('Invalid login credentials').then(() => console.log("Failed to login"));
       }
       setIsLoading(false);
     }, 1000);
@@ -119,7 +121,7 @@ const LoginButton = () => {
     setTimeout(() => {
       console.log('Registration values:', values);
       // Perform registration here
-      setLoggedInValue(true, values.username);
+      dispatch(setLoggedInValue({value: true, username: values.username}));
       setIsRegistrationModalVisible(false);
       setIsLoading(false);
     }, 1000);
@@ -143,7 +145,7 @@ const LoginButton = () => {
       {isLoggedIn ?
         <div>
           <NameSpan>{username}</NameSpan>
-          <StyledStatusButton loggedIn onClick={statusHandler}>
+          <StyledStatusButton loggedIn onClick={handleLogOut}>
             Log out
           </StyledStatusButton>
         </div>
